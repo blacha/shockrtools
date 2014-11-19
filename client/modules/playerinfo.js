@@ -33,6 +33,11 @@ var STPlayerInfo = function() {
             var alliance = PlayerInfo.instance.get_Alliance();
             PlayerInfo.output.alliancename = alliance.get_Name();
             PlayerInfo.output.alliance = alliance.get_Id();
+
+            PlayerInfo.output.bonus = {};
+            PlayerInfo.output.bonus.power = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power);
+            PlayerInfo.output.bonus.crystal = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal);
+            PlayerInfo.output.bonus.tiberium = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium);
         },
 
         _getNextMVC: function() {
@@ -68,6 +73,9 @@ var STPlayerInfo = function() {
 
 
         },
+
+
+
 
         _getCities: function() {
             ST.log.debug('\t getCities');
