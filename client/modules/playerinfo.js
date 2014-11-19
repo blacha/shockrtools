@@ -34,8 +34,10 @@ var STPlayerInfo = function() {
             PlayerInfo.output.alliancename = alliance.get_Name();
             PlayerInfo.output.alliance = alliance.get_Id();
 
-            PlayerInfo.output.commandpoints = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.CommandPoints);
-            PlayerInfo.output.repair = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.RepairChargeInf);
+            PlayerInfo.output.command = {
+                max: player.GetCommandPointMaxStorage(),
+                current: player.GetCommandPointCount()
+            };
 
             PlayerInfo.output.bonus = {};
             PlayerInfo.output.bonus.power = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power);
@@ -102,6 +104,8 @@ var STPlayerInfo = function() {
             ST.log.debug('\t\t getCity - ' + c.get_Name());
             var base = {};
 
+            PlayerInfo.output.repair = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.RepairChargeInf);
+
             base.defense = c.get_LvlDefense();
             base.offense = c.get_LvlOffense();
 
@@ -116,6 +120,8 @@ var STPlayerInfo = function() {
 
             base.credits = ClientLib.Base.Resource.GetResourceGrowPerHour(c.get_CityCreditsProduction(), false) +
                 ClientLib.Base.Resource.GetResourceBonusGrowPerHour(c.get_CityCreditsProduction(), false);
+
+            base.health = c.GetBuildingsConditionInPercent();
 
             base.current = {};
             base.current.power = c.GetResourceCount(ClientLib.Base.EResourceType.Power);
