@@ -2,11 +2,7 @@ require('./class.js');
 
 var async = require('async');
 
-var TAOPT = require('./base-node.js');
-require('./base.js')(TAOPT);
-require('./layout.js')(TAOPT);
-require('./buildings.js')(TAOPT);
-require('./base-util.js')(TAOPT);
+var TAOPT = require('../meteor/lib/taopt/base.js');
 
 var mongojs = require('mongojs');
 

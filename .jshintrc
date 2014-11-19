@@ -17,7 +17,8 @@
         "angular": false,
         "taopt": false,
         "moment": false,
-        "$": false
+        "$": false,
+        "Meteor" : false
     },
 
     "node" : true,
@@ -38,7 +39,7 @@
     "noempty": true,
     "nonew": false,
     "plusplus": false,
-    "undef": true,
+    "undef": false,
     "strict": false,
     "unused": true,
     "trailing": true,
