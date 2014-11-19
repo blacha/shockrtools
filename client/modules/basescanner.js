@@ -120,6 +120,7 @@ var STBaseScanner = function() {
 
             if (base === undefined) {
                 ST.util.button.setLabel('Scan');
+                return;
             }
 
             if (BaseScanner._lastBaseID !== base.selectedBaseID) {

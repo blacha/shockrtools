@@ -6,7 +6,7 @@
 // @grant           GM_xmlhttpRequest
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         3.0
+// @version         4.0
 // @downloadURL     https://c.ac.nz/beta/client/shockrtools.user.js
 // ==/UserScript==
 
