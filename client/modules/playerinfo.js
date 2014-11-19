@@ -34,6 +34,9 @@ var STPlayerInfo = function() {
             PlayerInfo.output.alliancename = alliance.get_Name();
             PlayerInfo.output.alliance = alliance.get_Id();
 
+            PlayerInfo.output.commandpoints = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.CommandPoints);
+            PlayerInfo.output.repair = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.RepairChargeInf);
+
             PlayerInfo.output.bonus = {};
             PlayerInfo.output.bonus.power = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power);
             PlayerInfo.output.bonus.crystal = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal);
@@ -114,6 +117,11 @@ var STPlayerInfo = function() {
             base.credits = ClientLib.Base.Resource.GetResourceGrowPerHour(c.get_CityCreditsProduction(), false) +
                 ClientLib.Base.Resource.GetResourceBonusGrowPerHour(c.get_CityCreditsProduction(), false);
 
+            base.current = {};
+            base.current.power = c.GetResourceCount(ClientLib.Base.EResourceType.Power);
+            base.current.tiberium = c.GetResourceCount(ClientLib.Base.EResourceType.Tiberium);
+            base.current.crystal = c.GetResourceCount(ClientLib.Base.EResourceType.Crystal);
+
             base.level = c.get_LvlBase();
 
             base.id = c.get_Id();
@@ -123,6 +131,11 @@ var STPlayerInfo = function() {
 
             base.buildings = PlayerInfo._getBuildings(c, base);
             base.units = PlayerInfo._getUnits(c);
+
+            base.repair = {};
+            base.repair.infantry = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
+            base.repair.vehicle = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false);
+            base.repair.air = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
 
             PlayerInfo.output.bases[c.get_Name()] = base;
         },
