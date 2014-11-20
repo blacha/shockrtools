@@ -93,6 +93,7 @@ var STBaseScanner = function() {
                         id: object.getID(),
                         distance: distance,
                         selectedBaseID: base.get_Id(),
+                        alliance: ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id(),
                         failCount: 0
                     };
 
@@ -119,6 +120,8 @@ var STBaseScanner = function() {
             }
 
             if (base === undefined) {
+                BaseScanner._abort = false;
+                BaseScanner._scanning = false;
                 ST.util.button.setLabel('Scan');
                 return;
             }
@@ -346,6 +349,7 @@ var STBaseScanner = function() {
 
             obj.layout = BaseScanner.getLayout(base);
             obj.name = baseName;
+            obj.alliance = ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id();
 
             BaseScanner._bases[obj.x + ':' + obj.y] = obj;
             BaseScanner._selectionBases[obj.x + ':' + obj.y] = obj;
