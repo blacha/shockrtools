@@ -34,6 +34,8 @@ var STPlayerInfo = function() {
             PlayerInfo.output.alliancename = alliance.get_Name();
             PlayerInfo.output.alliance = alliance.get_Id();
 
+            PlayerInfo.output.rp = player.get_ResearchPoints();
+
             PlayerInfo.output.command = {
                 max: player.GetCommandPointMaxStorage(),
                 current: player.GetCommandPointCount()
@@ -142,6 +144,7 @@ var STPlayerInfo = function() {
             base.repair.infantry = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
             base.repair.vehicle = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Vehicle, false);
             base.repair.air = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
+            base.repair.time = c.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
 
             PlayerInfo.output.bases[c.get_Name()] = base;
         },
