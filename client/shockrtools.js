@@ -7,7 +7,7 @@
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
 // @version         4.0
-// @downloadURL     https://beta.c.ac.nz/client/shockrtools.user.js
+// @downloadURL     https://c.ac.nz/beta/cclient/shockrtools.user.js
 // ==/UserScript==
 
 /* globals qx, ClientLib, DDP */
@@ -127,7 +127,7 @@ var setupShockrTools = function() {
 
     ST.util = {
         // URL: 'wss://localhost:443/websocket',
-        URL: 'wss://beta.c.ac.nz/websocket',
+        URL: 'wss://c.ac.nz/beta/websocket',
 
         isLoaded: function() {
             if (typeof qx === 'undefined') {
