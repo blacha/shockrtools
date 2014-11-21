@@ -17,6 +17,47 @@ function deleteBase(base) {
     };
 }
 
+function updateBase(base, newBase) {
+    var output = newBase.getOutput();
+    return function(next) {
+        layout.update({
+            _id: base._id
+        }, {
+            $set: {
+                layout: newBase.toCNCOpt(),
+
+                tib: output.tiberium,
+                cry: output.crystal,
+                total: output.tiberium + output.crystal,
+                v: TAOPT.version
+            }
+        }, next);
+    };
+}
+
+function reCalcBase() {
+    var  toUpdate = [];
+    layout.find({}, function(err, val) {
+        for (var i = 0; i < val.length; i++) {
+            var base = val[i];
+            var Base = new TAOPT.Base(base.layout);
+            TAOPT.util.optimize(Base);
+
+            toUpdate.push(updateBase(base, Base));
+            console.log(base);
+        }
+
+        async.series(toUpdate, function (err, data){
+            console.log(err);
+            process.exit();
+        });
+    });
+
+
+}
+
+reCalcBase();
+
 function layoutBase(base) {
     return function(next) {
         layout.findOne({
@@ -24,7 +65,7 @@ function layoutBase(base) {
             x: base.x,
             y: base.y
         }, function(err, val) {
-            if (err){
+            if (err) {
                 return next(err);
             }
 
@@ -65,36 +106,38 @@ function layoutBase(base) {
     };
 }
 
-var oldDate = new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
+function copyBases() {
+    var oldDate = new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
 
-bases.find(function(err, values) {
-    if (err) {
-        return console.log(err);
-    }
-    var toRun = [];
-
-    for (var i = 0; i < values.length; i++) {
-        var val = values[i];
-        if (val.date < oldDate) {
-            delete val._id;
-            toRun.push(deleteBase(val));
-        } else {
-            toRun.push(layoutBase(val));
+    bases.find(function(err, values) {
+        if (err) {
+            return console.log(err);
         }
-    }
+        var toRun = [];
 
-    toRun.push(function(next) {
-        console.log('REMOVE!');
-        bases.remove({
-            date: {
-                $lt: oldDate
+        for (var i = 0; i < values.length; i++) {
+            var val = values[i];
+            if (val.date < oldDate) {
+                delete val._id;
+                toRun.push(deleteBase(val));
+            } else {
+                toRun.push(layoutBase(val));
             }
-        }, next);
-    });
+        }
 
-    async.series(toRun, function(err) {
-        console.log(err);
+        toRun.push(function(next) {
+            console.log('REMOVE!');
+            bases.remove({
+                date: {
+                    $lt: oldDate
+                }
+            }, next);
+        });
 
-        process.exit();
+        async.series(toRun, function(err) {
+            console.log(err);
+
+            process.exit();
+        });
     });
-});
+}
