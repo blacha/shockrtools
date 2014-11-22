@@ -1,5 +1,3 @@
-require('./class.js');
-
 var async = require('async');
 
 var TAOPT = require('../meteor/lib/taopt/base.js');
@@ -19,44 +17,49 @@ function deleteBase(base) {
 
 function updateBase(base, newBase) {
     var output = newBase.getOutput();
+    var set = {
+        $set: {
+            layout: newBase.toCNCOpt(),
+
+            tib: output.tiberium,
+            cry: output.crystal,
+            total: output.tiberium + output.crystal,
+            v: TAOPT.version
+        }
+    };
+    console.log(set);
     return function(next) {
         layout.update({
             _id: base._id
-        }, {
-            $set: {
-                layout: newBase.toCNCOpt(),
-
-                tib: output.tiberium,
-                cry: output.crystal,
-                total: output.tiberium + output.crystal,
-                v: TAOPT.version
-            }
-        }, next);
+        }, set, next);
     };
 }
 // doesnt work?
-// function reCalcBase() {
-//     var  toUpdate = [];
-//     layout.find({}, function(err, val) {
-//         for (var i = 0; i < val.length; i++) {
-//             var base = val[i];
-//             var Base = new TAOPT.Base(base.layout);
-//             TAOPT.util.optimize(Base);
+function reCalcBase() {
+    var toUpdate = [];
+    layout.find({}, {
+        sort: {
+            tib: -1
+        }
+    }, function(err, val) {
+        for (var i = 0; i < val.length; i++) {
+            var base = val[i];
+            var Base = new TAOPT.Base(base.layout);
+            TAOPT.util.optimize(Base);
 
-//             toUpdate.push(updateBase(base, Base));
-//             console.log(base);
-//         }
+            toUpdate.push(updateBase(base, Base));
+        }
 
-//         async.series(toUpdate, function (err, data){
-//             console.log(err);
-//             process.exit();
-//         });
-//     });
+        async.series(toUpdate, function(err) {
+            console.log(err);
+            process.exit();
+        });
+    });
 
 
-// }
+}
 
-// reCalcBase();
+reCalcBase();
 
 function layoutBase(base) {
     return function(next) {
