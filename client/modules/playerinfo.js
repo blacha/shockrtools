@@ -82,11 +82,9 @@ var STPlayerInfo = function() {
         },
 
 
-
-
         _getCities: function() {
             ST.log.debug('\t getCities');
-            PlayerInfo.output.bases = {};
+            PlayerInfo.output.bases = [];
             var allCities = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
             for (var selectedBaseID in allCities) {
                 if (!allCities.hasOwnProperty(selectedBaseID)) {
@@ -146,7 +144,8 @@ var STPlayerInfo = function() {
             base.repair.air = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
             base.repair.time = c.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
 
-            PlayerInfo.output.bases[c.get_Name()] = base;
+            base = base.get_Name();
+            PlayerInfo.output.bases.push(base);
         },
 
         saveInfo: function() {
