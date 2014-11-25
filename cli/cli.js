@@ -27,11 +27,14 @@ function updateBase(base, newBase) {
             v: TAOPT.version
         }
     };
-    console.log(set);
+    if (base.tib > 0){
+        console.log(base.tib, output.tiberium);
+    }
     return function(next) {
         layout.update({
             _id: base._id
         }, set, next);
+        // process.exit();
     };
 }
 // doesnt work?
