@@ -136,7 +136,6 @@ var STPlayerInfo = function() {
             base.y = c.get_PosY();
 
             base.buildings = PlayerInfo._getBuildings(c, base);
-            base.units = PlayerInfo._getUnits(c);
 
             base.repair = {};
             base.repair.infantry = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
@@ -154,6 +153,79 @@ var STPlayerInfo = function() {
         saveInfo: function() {
             ST.util.api('savePlayer', PlayerInfo.output);
         },
+        _getUnits: function(city) {
+            var D = {};
+            var O = {};
+            var x, y, o;
+            for (var k in city) {
+                var currentFunc = city[k];
+                if (typeof currentFunc !== 'object') {
+                    continue;
+                }
+
+                for (var k2 in currentFunc) {
+                    var listObj = currentFunc[k2];
+                    // console.log(k2, listObj);
+                    if (listObj === null || typeof listObj !== 'object' || listObj.d === undefined) {
+                        continue;
+                    }
+
+                    var lst = listObj.d;
+                    // console.log(lst);
+                    if (typeof lst !== 'object') {
+                        continue;
+                    }
+
+                    for (var i in lst) {
+                        var unit = lst[i];
+                        if (typeof unit !== 'object' || unit.get_UnitGameData_Obj === undefined) {
+                            continue;
+                        }
+                        // console.log(unit, unit.get_UnitGameData_Obj());
+                        var name = unit.get_UnitGameData_Obj().n;
+                        x = unit.get_CoordX();
+                        y = unit.get_CoordY();
+                        var level = unit.get_CurrentLevel();
+                        var dName = PlayerInfo.map.defense[name];
+                        var oName = PlayerInfo.map.offense[name];
+                        if (dName !== undefined) {
+                            D[x + ':' + y] = level + dName;
+                        }
+                        if (oName !== undefined) {
+                            O[x + ':' + y] = level + oName;
+                        }
+                    }
+                }
+
+            }
+            var out = [];
+            for (y = 0; y < 8; y++) {
+                for (x = 0; x < 9; x++) {
+                    o = D[x + ':' + y];
+                    if (o === undefined) {
+                        out.push('.');
+                    } else {
+                        out.push(o);
+                    }
+
+                }
+            }
+
+            for (y = 0; y < 4; y++) {
+                for (x = 0; x < 9; x++) {
+                    o = O[x + ':' + y];
+                    if (o === undefined) {
+                        out.push('.');
+                    } else {
+                        out.push(o);
+                    }
+
+                }
+            }
+
+            return out.join('');
+        },
+
 
         _getBuildings: function(base) {
             var buildings = base.get_Buildings();
@@ -208,7 +280,7 @@ var STPlayerInfo = function() {
                 }
             }
 
-            return layout.join('');
+            return layout.join('') + PlayerInfo._getUnits(base);
         },
 
         startup: function() {
@@ -225,9 +297,6 @@ var STPlayerInfo = function() {
             PlayerInfo.interval = undefined;
         },
 
-        _getUnits: function() {
-
-        },
 
         map: {
             faction: {
