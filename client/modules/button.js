@@ -18,7 +18,7 @@ var STAuth = function() {
             type: 'singleton',
             extend: qx.core.Object,
             construct: function() {
-                this.button = new qx.ui.form.Button('Login');
+                this.button = new qx.ui.form.Button('Scan');
                 this.button.set({
                     width: 100,
                     appearance: 'button-bar-center',

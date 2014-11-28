@@ -11,6 +11,7 @@ var STPlayerInfo = function() {
             ST.log.debug('getInfo');
             PlayerInfo.instance = ClientLib.Data.MainData.GetInstance();
             PlayerInfo.output.world = PlayerInfo.instance.get_Server().get_WorldId();
+            PlayerInfo.output.worldname = PlayerInfo.instance.get_Server().get_Name();
 
             PlayerInfo._getPlayerInfo();
             PlayerInfo._getNextMVC();
@@ -35,6 +36,7 @@ var STPlayerInfo = function() {
             PlayerInfo.output.alliance = alliance.get_Id();
 
             PlayerInfo.output.rp = player.get_ResearchPoints();
+            PlayerInfo.output.credit = player.get_Credits();
 
             PlayerInfo.output.command = {
                 max: player.GetCommandPointMaxStorage(),
@@ -77,8 +79,6 @@ var STPlayerInfo = function() {
             if (mcvTime !== Infinity && !isNaN(mcvTime)) {
                 PlayerInfo.output.mcvtime = mcvTime;
             }
-
-
         },
 
 
@@ -144,7 +144,10 @@ var STPlayerInfo = function() {
             base.repair.air = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Aircraft, false);
             base.repair.time = c.GetResourceCount(ClientLib.Base.EResourceType.RepairChargeInf);
 
-            base = base.get_Name();
+            base.name = c.get_Name();
+            if (typeof base.name === 'string') {
+                base.name.replace(/\./g, '');
+            }
             PlayerInfo.output.bases.push(base);
         },
 

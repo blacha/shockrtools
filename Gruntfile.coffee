@@ -10,7 +10,7 @@ module.exports = (grunt) ->
         jshint:
             options:
                 jshintrc: '.jshintrc'
-                ignores: ['client/modules/ddp.js', 'client/cncopt.user.js']
+                ignores: ['client/modules/ddp.js', 'client/temp.js', 'client/*.user.js']
             src: jspath
 
         # Remove old build files

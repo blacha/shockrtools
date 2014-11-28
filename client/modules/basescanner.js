@@ -185,7 +185,7 @@ var STBaseScanner = function() {
 
             ST.util.api('scanBase', data, function() {
                 BaseScanner.printScanResults(base);
-                if (!BaseScanner.isScanning()){
+                if (!BaseScanner.isScanning()) {
                     ST.util.button.setLabel('Scan');
                 }
             });

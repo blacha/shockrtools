@@ -3,6 +3,7 @@ var STBaseCounter = function() {
 
     var BaseCounter = {
         name: 'BaseCounter',
+        ui: {},
 
         pasteOutput: function(x, y, baseCount, baseData) {
             var input = qx.core.Init.getApplication().getChat().getChatWidget().getEditable();
@@ -65,11 +66,15 @@ var STBaseCounter = function() {
                 }
             }
 
-            console.log('[' + x + ':' + y + '] Found ' + count + ' bases - ' + output.join(', '));
-            if (paste === undefined || paste === true){
+            // console.log('[' + x + ':' + y + '] Found ' + count + ' bases - ' + output.join(', '));
+            if (paste === undefined || paste === true) {
                 BaseCounter.pasteOutput(x, y, count, output.join(', '));
             }
-            return {total: count, levels: levelCount};
+            return {
+                total: count,
+                levels: levelCount,
+                formatted: output.join(', ')
+            };
         },
 
         count: function(paste) {
@@ -80,16 +85,146 @@ var STBaseCounter = function() {
             return BaseCounter.countBases(BaseCounter.selectedBase.get_RawX(), BaseCounter.selectedBase.get_RawY(), paste);
         },
 
+        onRegionShow: function(c) {
+            var target = c.getTarget();
+            var object = target.getLayoutParent().getObject();
+
+            var count = BaseCounter.countBases(object.get_RawX(), object.get_RawY(), false);
+
+            BaseCounter.ui.region.total.setValue(count.total);
+            BaseCounter.ui.region.levels.setValue(count.formatted);
+
+            target.add(BaseCounter.ui.region.container);
+        },
+
+        onBaseMoveChange: function(x, y) {
+            var coord = ClientLib.Base.MathUtil.EncodeCoordId(x, y);
+            var count = BaseCounter.moveCache[coord];
+
+            if (count === undefined) {
+                count = BaseCounter.countBases(x, y, false);
+                BaseCounter.moveCache[coord] = count;
+            }
+
+            BaseCounter.ui.move.total.setValue(count.total);
+            BaseCounter.ui.move.levels.setValue(count.formatted);
+        },
+
+        onBaseMoveDeActivate: function() {
+            BaseCounter.moveCache = {};
+        },
+
+        onBaseMoveActivate: function() {
+            BaseCounter.moveCache = {};
+        },
+
+        buildMoveUI: function() {
+            BaseCounter.ui.move = {};
+
+            var a = new qx.ui.container.Composite(new qx.ui.layout.HBox(6));
+            a.add(new qx.ui.basic.Label('# Forgotten bases:').set({
+                alignY: 'middle'
+            }));
+            BaseCounter.ui.move.total = new qx.ui.basic.Label().set({
+                alignY: 'middle',
+                font: 'bold',
+                textColor: 'text-region-value'
+            });
+            a.add(BaseCounter.ui.move.total);
+
+            var b = new qx.ui.container.Composite(new qx.ui.layout.HBox(6));
+            b.add(new qx.ui.basic.Label('Levels:').set({
+                alignY: 'middle'
+            }));
+            BaseCounter.ui.move.levels = new qx.ui.basic.Label().set({
+                alignY: 'middle',
+                font: 'bold',
+                textColor: 'text-region-value'
+            });
+            b.add(BaseCounter.ui.move.levels);
+
+
+            BaseCounter.ui.move.container = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
+                textColor: 'text-region-tooltip'
+            });
+
+            BaseCounter.ui.move.container.add(a);
+            BaseCounter.ui.move.container.add(b);
+            webfrontend.gui.region.RegionCityMoveInfo.getInstance().addAt(BaseCounter.ui.move.container, 3);
+        },
+
+        buildRegionUI: function() {
+            BaseCounter.ui.region = {};
+
+            var a = new qx.ui.container.Composite(new qx.ui.layout.HBox(4));
+            a.add(new qx.ui.basic.Label('# Forgotten bases:'));
+            BaseCounter.ui.region.total = new qx.ui.basic.Label().set({
+                textColor: 'text-region-value'
+            });
+            a.add(BaseCounter.ui.region.total);
+
+            var b = new qx.ui.container.Composite(new qx.ui.layout.HBox(4));
+            b.add(new qx.ui.basic.Label('Levels:'));
+            BaseCounter.ui.region.levels = new qx.ui.basic.Label().set({
+                textColor: 'text-region-value'
+            });
+            b.add(BaseCounter.ui.region.levels);
+
+            BaseCounter.ui.region.container = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
+                marginTop: 6,
+                textColor: 'text-region-tooltip'
+            });
+
+            BaseCounter.ui.region.container.add(a);
+            BaseCounter.ui.region.container.add(b);
+        },
+
         startup: function() {
+            BaseCounter.bindings = [
+                webfrontend.gui.region.RegionCityStatusInfoOwn,
+                webfrontend.gui.region.RegionCityStatusInfoAlliance,
+                webfrontend.gui.region.RegionCityStatusInfoEnemy,
+                webfrontend.gui.region.RegionNPCBaseStatusInfo,
+                webfrontend.gui.region.RegionNPCCampStatusInfo,
+                webfrontend.gui.region.RegionRuinStatusInfo
+            ];
+
+            BaseCounter._listeners = [];
+            for (var i = 0; i < BaseCounter.bindings.length; i++) {
+                var bind = BaseCounter.bindings[i];
+                var bindID = bind.getInstance().addListener('appear', BaseCounter.onRegionShow);
+                BaseCounter._listeners[i] = bindID;
+            }
+
+            var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
+            phe.cnc.Util.attachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, BaseCounter, BaseCounter.onBaseMoveChange);
+            phe.cnc.Util.attachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, BaseCounter, BaseCounter.onBaseMoveDeActivate);
+            phe.cnc.Util.attachNetEvent(mouseTool, 'OnActivate', ClientLib.Vis.MouseTool.OnActivate, BaseCounter, BaseCounter.onBaseMoveActivate);
+
+            BaseCounter.buildRegionUI();
+            BaseCounter.buildMoveUI();
             BaseCounter.registerButton();
         },
 
         destroy: function() {
-            if ( webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu ){
-                webfrontend.gui.region.RegionCityMenu.prototype.showMenu = webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu;
-                webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_initialized = false;
-                webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu = undefined;
+            for (var i = 0; i < BaseCounter.bindings.length; i++) {
+                var bindID = BaseCounter._listeners[i];
+                if (bindID !== undefined) {
+                    BaseCounter.bindings[i].getInstance().removeListenerById(bindID);
+                }
             }
+            BaseCounter._listeners = [];
+
+            var mouseTool = ClientLib.Vis.VisMain.GetInstance().GetMouseTool(ClientLib.Vis.MouseTool.EMouseTool.MoveBase);
+            phe.cnc.Util.detachNetEvent(mouseTool, 'OnCellChange', ClientLib.Vis.MouseTool.OnCellChange, BaseCounter, BaseCounter.onBaseMoveChange);
+            phe.cnc.Util.detachNetEvent(mouseTool, 'OnDeactivate', ClientLib.Vis.MouseTool.OnDeactivate, BaseCounter, BaseCounter.onBaseMoveDeActivate);
+            phe.cnc.Util.detachNetEvent(mouseTool, 'OnActivate', ClientLib.Vis.MouseTool.OnActivate, BaseCounter, BaseCounter.onBaseMoveActivate);
+
+            webfrontend.gui.region.RegionCityMoveInfo.getInstance().removeAt(3);
+        },
+
+        onShow: function(c) {
+            console.log(c);
         },
 
         registerButton: function() {
@@ -102,13 +237,13 @@ var STBaseCounter = function() {
                         this.__baseCounterButton_initialized = true;
 
                         this.__baseCountButton = new qx.ui.form.Button('Paste BaseCount');
-                        this.__baseCountButton.addListener('execute', function(){
+                        this.__baseCountButton.addListener('execute', function() {
                             BaseCounter.count();
                         });
                     }
 
 
-                    if (BaseCounter.lastBase !== BaseCounter.selectedBase){
+                    if (BaseCounter.lastBase !== BaseCounter.selectedBase) {
                         var count = BaseCounter.count(false);
                         this.__baseCountButton.setLabel('Bases: ' + count.total);
                         BaseCounter.lastBase = BaseCounter.selectedBase;
@@ -154,5 +289,3 @@ var STBaseCounter = function() {
 
 var ST_MODULES = window.ST_MODULES || [];
 ST_MODULES.push(STBaseCounter);
-
-
