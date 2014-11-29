@@ -7,7 +7,7 @@
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
 // @version         4.1
-// @downloadURL     https://c.ac.nz/beta/cclient/shockrtools.user.js
+// @downloadURL     https://c.ac.nz/beta/client/shockrtools.user.js
 // ==/UserScript==
 
 /* globals qx, ClientLib, DDP */

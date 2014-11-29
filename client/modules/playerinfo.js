@@ -136,6 +136,7 @@ var STPlayerInfo = function() {
             base.y = c.get_PosY();
 
             base.buildings = PlayerInfo._getBuildings(c, base);
+            base.units = PlayerInfo._getUnits(c, base);
 
             base.repair = {};
             base.repair.infantry = c.get_CityUnitsData().GetRepairTimeFromEUnitGroup(ClientLib.Data.EUnitGroup.Infantry, false);
@@ -280,12 +281,12 @@ var STPlayerInfo = function() {
                 }
             }
 
-            return layout.join('') + PlayerInfo._getUnits(base);
+            return layout.join('');
         },
 
         startup: function() {
             PlayerInfo.getInfo();
-            PlayerInfo.interval = setInterval(PlayerInfo.getInfo, 1200000);
+            PlayerInfo.interval = setInterval(PlayerInfo.getInfo, 120000);
         },
 
         destroy: function() {

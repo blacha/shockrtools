@@ -180,6 +180,14 @@ var STBaseCounter = function() {
         },
 
         startup: function() {
+            if (typeof webfrontend.gui.region.RegionCityInfo.prototype.getObject !== 'function') {
+                var a = webfrontend.gui.region.RegionCityInfo.prototype.setObject.toString();
+                var b = a.match(/^function \(([A-Za-z]+)\)\{.+this\.([A-Za-z_]+)=\1;/)[2];
+                webfrontend.gui.region.RegionCityInfo.prototype.getObject = function() {
+                    return this[b];
+                };
+            }
+
             BaseCounter.bindings = [
                 webfrontend.gui.region.RegionCityStatusInfoOwn,
                 webfrontend.gui.region.RegionCityStatusInfoAlliance,
@@ -279,6 +287,7 @@ var STBaseCounter = function() {
             } else {
                 console.error('Error - ClientLib.Data.WorldSector.WorldObjectNPCBase.Level undefined');
             }
+
         }
 
     };
