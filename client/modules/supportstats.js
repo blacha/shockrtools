@@ -79,7 +79,7 @@ var STSupportStats = function() {
             var finalOutput = [];
             data.forEach(function(o) {
                 var output = [
-                    o.average.toFixed(2),
+                    (o.average || 0).toFixed(2),
                     o.name
                 ];
 
@@ -118,7 +118,10 @@ var STSupportStats = function() {
                 var supportName = GAMEDATA.supportTechs[supportId];
                 var supportStat = SupportStats._supports[supportId];
 
-                output.push(SupportStats.pad(supportName.dn, 18) + ' count:' + supportStat.count + '   avg:' + ((supportStat.level / supportStat.count)).toFixed(2));
+                var count = supportStat === undefined ? 0 : supportStat.count;
+                var avg = supportStat === undefined ? 0 : (supportStat.level / supportStat.count);
+
+                output.push(SupportStats.pad(supportName.dn, 18) + ' count:' + count + '   avg:' + avg);
             }
 
             output.push('-----------');
@@ -188,6 +191,7 @@ var STSupportStats = function() {
     };
 
     ST.register(SupportStats);
+
 };
 
 var ST_MODULES = window.ST_MODULES || [];

@@ -8,6 +8,7 @@ var STPlayerInfo = function() {
         output: {},
 
         getInfo: function() {
+            PlayerInfo.patchClientLib();
             ST.log.debug('getInfo');
             PlayerInfo.instance = ClientLib.Data.MainData.GetInstance();
             PlayerInfo.output.world = PlayerInfo.instance.get_Server().get_WorldId();
@@ -32,21 +33,67 @@ var STPlayerInfo = function() {
             PlayerInfo.output.rank = player.get_OverallRank();
 
             var alliance = PlayerInfo.instance.get_Alliance();
-            PlayerInfo.output.alliancename = alliance.get_Name();
-            PlayerInfo.output.alliance = alliance.get_Id();
+            PlayerInfo.output.alliance = {
+                id: alliance.get_Id(),
+                name: alliance.get_Name(),
+                bases: PlayerInfo._getAllianceBases(),
+                bonus: {
+                    power: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power),
+                    crystal: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal),
+                    tiberium: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium)
+                }
+            };
 
             PlayerInfo.output.rp = player.get_ResearchPoints();
-            PlayerInfo.output.credit = player.get_Credits();
+            PlayerInfo.output.credit = player.get_Credits().Base;
 
             PlayerInfo.output.command = {
                 max: player.GetCommandPointMaxStorage(),
                 current: player.GetCommandPointCount()
             };
 
-            PlayerInfo.output.bonus = {};
-            PlayerInfo.output.bonus.power = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power);
-            PlayerInfo.output.bonus.crystal = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal);
-            PlayerInfo.output.bonus.tiberium = alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium);
+            PlayerInfo.output.alliance.bonus = {};
+        },
+
+        _getAllianceBases: function() {
+            var world = ClientLib.Data.MainData.GetInstance().get_World();
+            var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
+
+            var sectors = world.getSectors().d;
+            var bases = [];
+            Object.keys(sectors).forEach(function(s) {
+                var sector = sectors[s];
+                var baseList = sector.getBases().d;
+                Object.keys(baseList).forEach(function(o) {
+                    var base = baseList[o];
+                    if (typeof base.getOwnerID !== 'function') {
+                        return;
+                    }
+
+                    var playerID = sector.GetPlayerId(base.getOwnerID());
+                    var player = allPlayers[playerID];
+                    if (player === undefined) {
+                        return;
+                    }
+
+                    if (base[baseHP] === 100) {
+                        return;
+                    }
+
+                    base.owner = getOwner(base, sector);
+                    bases.push({
+                        playerID: playerID,
+                        player: player.Name,
+                        base: base.getBaseName(),
+                        baseHealth: base.getBaseHealth()
+                    });
+                });
+            });
+
+            bases.sort(function(a, b) {
+                return b.baseHealth - a.baseHealth;
+            });
+            return bases;
         },
 
         _getNextMVC: function() {
@@ -154,25 +201,24 @@ var STPlayerInfo = function() {
         saveInfo: function() {
             ST.util.api('savePlayer', PlayerInfo.output);
         },
-        _getUnits: function(city) {
+
+        _getUnits: function(base) {
             var D = {};
             var O = {};
             var x, y, o;
-            for (var k in city) {
-                var currentFunc = city[k];
+            for (var k in base) {
+                var currentFunc = base[k];
                 if (typeof currentFunc !== 'object') {
                     continue;
                 }
 
                 for (var k2 in currentFunc) {
                     var listObj = currentFunc[k2];
-                    // console.log(k2, listObj);
                     if (listObj === null || typeof listObj !== 'object' || listObj.d === undefined) {
                         continue;
                     }
 
                     var lst = listObj.d;
-                    // console.log(lst);
                     if (typeof lst !== 'object') {
                         continue;
                     }
@@ -182,7 +228,6 @@ var STPlayerInfo = function() {
                         if (typeof unit !== 'object' || unit.get_UnitGameData_Obj === undefined) {
                             continue;
                         }
-                        // console.log(unit, unit.get_UnitGameData_Obj());
                         var name = unit.get_UnitGameData_Obj().n;
                         x = unit.get_CoordX();
                         y = unit.get_CoordY();
@@ -204,7 +249,7 @@ var STPlayerInfo = function() {
                 for (x = 0; x < 9; x++) {
                     o = D[x + ':' + y];
                     if (o === undefined) {
-                        out.push('.');
+                        out.push(PlayerInfo.getResourceType(base.GetResourceType(x, y + 8)));
                     } else {
                         out.push(o);
                     }
@@ -225,6 +270,32 @@ var STPlayerInfo = function() {
             }
 
             return out.join('');
+        },
+
+        getResourceType: function(type) {
+            switch (type) {
+                case 0:
+                    // Nothing
+                    return '.';
+                case 1:
+                    // Crystal
+                    return 'c';
+                case 2:
+                    // Tiberium
+                    return 't';
+                case 4:
+                    // Woods
+                    return 'j';
+                case 5:
+                    // Scrub
+                    return 'h';
+                case 6:
+                    // Oil
+                    return 'l';
+                case 7:
+                    // Swamp
+                    return 'k';
+            }
         },
 
 
@@ -297,7 +368,59 @@ var STPlayerInfo = function() {
             clearInterval(PlayerInfo.interval);
             PlayerInfo.interval = undefined;
         },
+        patchClientLib: function(){
+            var patches = [{
+                proto: ClientLib.Data.WorldSector.WorldObjectCity.prototype,
+                str: ClientLib.Data.WorldSector.WorldObjectCity.prototype.$ctor.toString(),
+                funcs: {
+                    getBaseName: /this.(.{6})=c.substr/,
+                    getBaseHealth: /\}this.(.{6}).*if \(n/,
+                    getOwnerID: /(.{6})=\(\(g>>0x16/
+                }
+            }, {
+                proto: ClientLib.Data.World.prototype,
+                str: ClientLib.Data.World.prototype.GetSector.toString(),
+                funcs: {
+                    getSectors: /\$r=this.(.{6})./
+                }
+            }, {
+                proto: ClientLib.Data.WorldSector.prototype,
+                str: ClientLib.Data.WorldSector.prototype.GetObject.toString(),
+                funcs: {
+                    getBases: /\$r=this.(.{6})./
+                }
+            }];
 
+            function makeReturn(str) {
+                return function() {
+                    return this[str];
+                };
+            }
+
+            for (var i = 0; i < patches.length; i++) {
+                var patch = patches[i];
+                var str = patch.str;
+
+                var functionNames = Object.keys(patch.funcs);
+                for (var j = 0; j < functionNames.length; j++) {
+                    var funcName = functionNames[j];
+                    var reg = patch.funcs[funcName];
+
+                    if (patch.proto[funcName] !== undefined) {
+                        continue;
+                    }
+
+                    var matches = str.match(reg);
+                    if (!matches) {
+                        console.error('Unable to map "' + funcName + '"');
+                        continue;
+                    }
+
+                    patch.proto[funcName] = makeReturn(matches[1]);
+                }
+
+            }
+        },
 
         map: {
             faction: {

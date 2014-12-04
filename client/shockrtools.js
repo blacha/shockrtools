@@ -6,7 +6,7 @@
 // @grant           GM_xmlhttpRequest
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         4.1
+// @version         4.2
 // @downloadURL     https://c.ac.nz/beta/client/shockrtools.user.js
 // ==/UserScript==
 
@@ -189,7 +189,6 @@ var setupShockrTools = function() {
                 });
             }
 
-            ST.log.info('API', method, data);
             ST.util.ddp.method(method, [data], callback);
         },
 
