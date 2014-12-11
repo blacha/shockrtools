@@ -30,7 +30,7 @@ function STKillInfo() {
 
                 var unit = c.get_UnitDetails();
                 // TODO adjust plunder to hp
-                // Does modifing the plunder object have any other effects
+                // Does modifying the plunder object have any other effects
                 // var hp = unit.get_HitpointsPercent();
                 var plunder = unit.get_UnitLevelRepairRequirements();
                 var data = unit.get_UnitGameData_Obj();
