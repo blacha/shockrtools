@@ -9,6 +9,7 @@ var STPlayerInfo = function() {
 
         getInfo: function() {
             PlayerInfo.patchClientLib();
+            console.time('ST:getInfo');
             ST.log.debug('getInfo');
             PlayerInfo.instance = ClientLib.Data.MainData.GetInstance();
             PlayerInfo.output.world = PlayerInfo.instance.get_Server().get_WorldId();
@@ -19,7 +20,7 @@ var STPlayerInfo = function() {
             PlayerInfo._getCities();
 
             ST.log.debug(PlayerInfo.output);
-
+            console.timeEnd('ST:getInfo');
             PlayerInfo.saveInfo();
         },
 
@@ -41,8 +42,18 @@ var STPlayerInfo = function() {
                     power: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power),
                     crystal: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal),
                     tiberium: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium)
-                }
+                },
+                players: []
             };
+
+            var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
+            var players = [];
+            Object.keys(allPlayers).forEach(function(o) {
+                var player = allPlayers[o];
+                players.push(player.name);
+            });
+
+            PlayerInfo.output.alliance.players = players;
 
             PlayerInfo.output.rp = player.get_ResearchPoints();
             PlayerInfo.output.credit = player.get_Credits().Base;
@@ -51,8 +62,6 @@ var STPlayerInfo = function() {
                 max: player.GetCommandPointMaxStorage(),
                 current: player.GetCommandPointCount()
             };
-
-            PlayerInfo.output.alliance.bonus = {};
         },
 
         _getAllianceBases: function() {
@@ -76,11 +85,10 @@ var STPlayerInfo = function() {
                         return;
                     }
 
-                    if (base[baseHP] === 100) {
+                    if (base.getBaseHealth() === 100) {
                         return;
                     }
 
-                    base.owner = getOwner(base, sector);
                     bases.push({
                         playerID: playerID,
                         player: player.Name,
