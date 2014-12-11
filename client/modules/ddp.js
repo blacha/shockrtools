@@ -1,15 +1,15 @@
 function STDDP() {
     (function(root, factory) {
-        if (typeof define === "function" && define.amd) {
+        if (typeof define === 'function' && define.amd) {
             define(factory);
-        } else if (typeof exports === "object") {
+        } else if (typeof exports === 'object') {
             module.exports = factory();
         } else {
             root.DDP = factory();
         }
     }(this, function() {
 
-        "use strict";
+        'use strict';
 
         var uniqueId = (function() {
             var i = 0;
@@ -18,18 +18,18 @@ function STDDP() {
             };
         })();
 
-        var INIT_DDP_MESSAGE = "{\"server_id\":\"0\"}";
+        var INIT_DDP_MESSAGE = '{\'server_id\':\'0\'}';
         // After hitting the plateau, it'll try to reconnect
         // every 16.5 seconds
         var RECONNECT_ATTEMPTS_BEFORE_PLATEAU = 10;
         var TIMER_INCREMENT = 300;
         var DEFAULT_PING_INTERVAL = 10000;
         var DDP_SERVER_MESSAGES = [
-            "added", "changed", "connected", "error", "failed",
-            "nosub", "ready", "removed", "result", "updated",
-            "ping", "pong"
+            'added', 'changed', 'connected', 'error', 'failed',
+            'nosub', 'ready', 'removed', 'result', 'updated',
+            'ping', 'pong'
         ];
-        var DDP_VERSION = "1";
+        var DDP_VERSION = '1';
 
         var DDP = function(options) {
             // Configuration
@@ -72,7 +72,7 @@ function STDDP() {
             this._onResultCallbacks[id] = onResult;
             this._onUpdatedCallbacks[id] = onUpdated;
             this._send({
-                msg: "method",
+                msg: 'method',
                 id: id,
                 method: name,
                 params: params
@@ -86,7 +86,7 @@ function STDDP() {
             this._onStopCallbacks[id] = onStop;
             this._onErrorCallbacks[id] = onError;
             this._send({
-                msg: "sub",
+                msg: 'sub',
                 id: id,
                 name: name,
                 params: params
@@ -96,7 +96,7 @@ function STDDP() {
 
         DDP.prototype.unsub = function(id) {
             this._send({
-                msg: "unsub",
+                msg: 'unsub',
                 id: id
             });
             return id;
@@ -129,19 +129,19 @@ function STDDP() {
         };
 
         DDP.prototype._send = function(object) {
-            if (this.readyState !== 1 && object.msg !== "connect") {
+            if (this.readyState !== 1 && object.msg !== 'connect') {
                 this._queue.push(object);
                 return;
             }
             var message;
-            if (typeof EJSON === "undefined") {
+            if (typeof EJSON === 'undefined') {
                 message = JSON.stringify(object);
             } else {
                 message = EJSON.stringify(object);
             }
             if (this._socketInterceptFunction) {
                 this._socketInterceptFunction({
-                    type: "socket_message_sent",
+                    type: 'socket_message_sent',
                     message: message,
                     timestamp: Date.now()
                 });
@@ -213,12 +213,12 @@ function STDDP() {
         };
 
         DDP.prototype._on_error = function(data) {
-            this._emit("error", data);
+            this._emit('error', data);
         };
         DDP.prototype._on_connected = function(data) {
             var self = this;
             var firstCon = self._reconnect_count === 0;
-            var eventName = firstCon ? "connected" : "reconnected";
+            var eventName = firstCon ? 'connected' : 'reconnected';
             self.readyState = 1;
             self._reconnect_count = 0;
             self._reconnect_incremental_timer = 0;
@@ -231,31 +231,31 @@ function STDDP() {
             self._ping_interval_handle = setInterval(function() {
                 var id = uniqueId();
                 self._send({
-                    msg: "ping",
+                    msg: 'ping',
                     id: id
                 });
             }, self._ping_interval);
         };
         DDP.prototype._on_failed = function(data) {
             this.readyState = 4;
-            this._emit("failed", data);
+            this._emit('failed', data);
         };
         DDP.prototype._on_added = function(data) {
-            this._emit("added", data);
+            this._emit('added', data);
         };
         DDP.prototype._on_removed = function(data) {
-            this._emit("removed", data);
+            this._emit('removed', data);
         };
         DDP.prototype._on_changed = function(data) {
-            this._emit("changed", data);
+            this._emit('changed', data);
         };
         DDP.prototype._on_ping = function(data) {
             this._send({
-                msg: "pong",
+                msg: 'pong',
                 id: data.id
             });
         };
-        DDP.prototype._on_pong = function(data) {
+        DDP.prototype._on_pong = function() {
             // For now, do nothing.
             // In the future we might want to log latency or so.
         };
@@ -263,13 +263,13 @@ function STDDP() {
         DDP.prototype._on_socket_close = function() {
             if (this._socketInterceptFunction) {
                 this._socketInterceptFunction({
-                    type: "socket_close",
+                    type: 'socket_close',
                     timestamp: Date.now()
                 });
             }
             clearInterval(this._ping_interval_handle);
             this.readyState = 4;
-            this._emit("socket_close");
+            this._emit('socket_close');
             if (this._autoreconnect) {
                 this._try_reconnect();
             }
@@ -277,24 +277,24 @@ function STDDP() {
         DDP.prototype._on_socket_error = function(e) {
             if (this._socketInterceptFunction) {
                 this._socketInterceptFunction({
-                    type: "socket_error",
+                    type: 'socket_error',
                     error: JSON.stringify(e),
                     timestamp: Date.now()
                 });
             }
             clearInterval(this._ping_interval_handle);
             this.readyState = 4;
-            this._emit("socket_error", e);
+            this._emit('socket_error', e);
         };
         DDP.prototype._on_socket_open = function() {
             if (this._socketInterceptFunction) {
                 this._socketInterceptFunction({
-                    type: "socket_open",
+                    type: 'socket_open',
                     timestamp: Date.now()
                 });
             }
             this._send({
-                msg: "connect",
+                msg: 'connect',
                 version: DDP_VERSION,
                 support: [DDP_VERSION]
             });
@@ -302,7 +302,7 @@ function STDDP() {
         DDP.prototype._on_socket_message = function(message) {
             if (this._socketInterceptFunction) {
                 this._socketInterceptFunction({
-                    type: "socket_message_received",
+                    type: 'socket_message_received',
                     message: message.data,
                     timestamp: Date.now()
                 });
@@ -312,7 +312,7 @@ function STDDP() {
                 return;
             }
             try {
-                if (typeof EJSON === "undefined") {
+                if (typeof EJSON === 'undefined') {
                     data = JSON.parse(message.data);
                 } else {
                     data = EJSON.parse(message.data);
@@ -321,11 +321,11 @@ function STDDP() {
                     throw new Error();
                 }
             } catch (e) {
-                console.warn("Non DDP message received:");
+                console.warn('Non DDP message received:');
                 console.warn(message.data);
                 return;
             }
-            this["_on_" + data.msg](data);
+            this['_on_' + data.msg](data);
         };
 
         return DDP;
