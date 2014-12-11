@@ -313,6 +313,7 @@ var STBaseScanner = function() {
         },
 
         scanCurrentBase: function() {
+            var data;
             var cities = ClientLib.Data.MainData.GetInstance().get_Cities();
             var base = cities.get_CurrentCity();
             BaseScanner.failCount++;
@@ -338,6 +339,13 @@ var STBaseScanner = function() {
                 delete offlineBase.obj;
                 BaseScanner._bases[obj.x + ':' + obj.y] = offlineBase;
                 BaseScanner.failCount = 0;
+                data = {
+                    'base': offlineBase,
+                    'world': ClientLib.Data.MainData.GetInstance().get_Server().get_WorldId(),
+                    'player': ClientLib.Data.MainData.GetInstance().get_Player().get_Name(),
+                    'alliance': ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id()
+                };
+                ST.util.api('scanBase', data);
                 return;
             }
 
@@ -369,7 +377,7 @@ var STBaseScanner = function() {
             ST.storage.set('base-' + obj.x + ':' + obj.y, JSON.stringify(obj));
             ST.log.info('[BaseScanner:AutoScan] ' + obj.x + ':' + obj.y + ' ' + obj.layout);
 
-            var data = {
+            data = {
                 'base': obj,
                 'world': ClientLib.Data.MainData.GetInstance().get_Server().get_WorldId(),
                 'player': ClientLib.Data.MainData.GetInstance().get_Player().get_Name(),
