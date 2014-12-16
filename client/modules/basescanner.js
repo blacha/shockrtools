@@ -59,7 +59,8 @@ var STBaseScanner = function() {
                         continue;
                     }
                     // already scanning this base from another city.
-                    if (BaseScanner._toScanMap[scanX + ':' + scanY] !== undefined) {
+                    if (BaseScanner._toScanMap[scanX + ':' + scanY] !== undefined ||
+                        BaseScanner._bases[scanX + ':' + scanY] !== undefined) {
                         continue;
                     }
 
