@@ -10,7 +10,7 @@ var STPlayerInfo = function() {
         getInfo: function() {
             PlayerInfo.patchClientLib();
             console.time('ST:getInfo');
-            ST.log.debug('getInfo');
+            // ST.log.debug('getInfo');
             PlayerInfo.instance = ClientLib.Data.MainData.GetInstance();
             PlayerInfo.output.world = PlayerInfo.instance.get_Server().get_WorldId();
             PlayerInfo.output.worldname = PlayerInfo.instance.get_Server().get_Name();
@@ -25,7 +25,7 @@ var STPlayerInfo = function() {
         },
 
         _getPlayerInfo: function() {
-            ST.log.debug('\t getPlayerInfo');
+            // ST.log.debug('\t getPlayerInfo');
             var player = PlayerInfo.instance.get_Player();
             PlayerInfo.output.id = player.get_Id();
             PlayerInfo.output.faction = PlayerInfo.map.faction[player.get_Faction()];
@@ -105,7 +105,7 @@ var STPlayerInfo = function() {
         },
 
         _getNextMVC: function() {
-            ST.log.debug('\t getNextMVC');
+            // ST.log.debug('\t getNextMVC');
             var player = PlayerInfo.instance.get_Player();
 
             var TechId = ClientLib.Base.Tech.GetTechIdFromTechNameAndFaction(
@@ -138,7 +138,7 @@ var STPlayerInfo = function() {
 
 
         _getCities: function() {
-            ST.log.debug('\t getCities');
+            // ST.log.debug('\t getCities');
             PlayerInfo.output.bases = [];
             var allCities = ClientLib.Data.MainData.GetInstance().get_Cities().get_AllCities().d;
             for (var selectedBaseID in allCities) {
@@ -156,7 +156,7 @@ var STPlayerInfo = function() {
         },
 
         _getCity: function(c) {
-            ST.log.debug('\t\t getCity - ' + c.get_Name());
+            // ST.log.debug('\t\t getCity - ' + c.get_Name());
             var base = {};
 
             PlayerInfo.output.repair = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.RepairChargeInf);
