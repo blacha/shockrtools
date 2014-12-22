@@ -15,10 +15,6 @@ var STSupportStats = function() {
         },
 
         getStats: function() {
-            if (SupportStats._stats.length > 0) {
-                return;
-            }
-
             var allSupports = ClientLib.Data.MainData.GetInstance().get_AllianceSupportState().get_Bases().d;
             var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
 
