@@ -71,7 +71,7 @@ var setupShockrTools = function() {
     ST.log.WARN = 40;
     ST.log.INFO = 30;
     ST.log.DEBUG = 20;
-    ST.log.level = ST.log.DEBUG;
+    ST.log.level = ST.log.WARN;
 
     ST.log.info = function() {
         if (ST.log.level > ST.log.INFO) {
