@@ -15,6 +15,7 @@ var STSupportStats = function() {
         },
 
         getStats: function() {
+            SupportStats.reset();
             var allSupports = ClientLib.Data.MainData.GetInstance().get_AllianceSupportState().get_Bases().d;
             var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
 
@@ -93,9 +94,8 @@ var STSupportStats = function() {
             var stats = SupportStats._alliance[AllianceName];
             output.push('Alliance Report for "' + AllianceName + '"');
             output.push('-----------');
-            output.push('Bases:    ' + stats.bases);
-            output.push('Supports: ' + stats.count);
-            output.push('Average:  ' + ((stats.count / stats.bases) * 100).toFixed(2) + '%');
+            output.push('Bases:    ' + stats.bases + '\tSupports:    ' + stats.count + ' (' + ((stats.count / stats.bases) * 100).toFixed(2) + '%)');
+            output.push('Average:  ' + (stats.level / stats.count).toFixed(2));
             output.push('-----------');
             output.push('Biggest Support');
             output.push('Player:   ' + stats.big_support.player);
