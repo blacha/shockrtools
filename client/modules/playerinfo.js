@@ -49,7 +49,7 @@ var PlayerInfo = {
         var players = [];
         Object.keys(allPlayers).forEach(function(o) {
             var player = allPlayers[o];
-            players.push(player.name);
+            players.push(player.Name);
         });
 
         PlayerInfo.output.alliance.players = players;
