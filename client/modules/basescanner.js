@@ -125,14 +125,14 @@ var BaseScanner = {
 
     done: function() {
         BaseScanner._done ++;
-        if (BaseScanner._count === BaseScanner._done) {
-            console.log('DONE', BaseScanner._count, BaseScanner._done);
+        if (BaseScanner._scanning === false &&
+            BaseScanner._count === BaseScanner._done) {
             ST.util.button.setLabel('Done! (' + BaseScanner._count + ')');
             setTimeout(function(){
                 ST.util.button.setLabel('Scan');
             }, 2000);
         } else {
-            ST.util.button.setLabel('Scanning... (' + BaseScanner._count + ')');
+            ST.util.button.setLabel('Scanning... (' + BaseScanner._count + '/'  + BaseScanner._toScan.length + ')');
         }
     },
 

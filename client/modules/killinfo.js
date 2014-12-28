@@ -6,12 +6,13 @@ var KillInfo = {
         KillInfo.findPrototype();
 
         if (KillInfo.protoName === undefined) {
-            ST.log.warn('Cant find prototype');
+            ST.log.warn('ST:KillInfo - Cant find prototype');
             return;
         }
         var proto = $I[KillInfo.protoName];
         if (proto === undefined ||
             proto.prototype[KillInfo.funcName] === undefined) {
+            ST.log.warn('ST:KillInfo - Cant find function');
             return;
         }
 
