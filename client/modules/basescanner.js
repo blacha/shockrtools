@@ -13,12 +13,14 @@ var BaseScanner = {
         if (BaseScanner._scanning) {
             return;
         }
-        ST.util.button.setLabel('Scanning');
 
+        window.open('https://c.ac.nz/#/bases/' + ClientLib.Data.MainData.GetInstance().get_Player().get_Name(), 'ST-BaseScanner');
+        ST.util.button.setLabel('Scanning');
         BaseScanner._bases = {};
 
         BaseScanner._scanning = true;
-
+        BaseScanner._count = 0;
+        BaseScanner._done = 0;
         BaseScanner.index = -1;
         BaseScanner._toScanMap = {};
         BaseScanner._toScan = [];
@@ -90,7 +92,8 @@ var BaseScanner = {
                         'player': ClientLib.Data.MainData.GetInstance().get_Player().get_Name(),
                         'alliance': ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id()
                     };
-                    ST.util.api('scanBase', data);
+                    BaseScanner._count ++;
+                    ST.util.api('scanBase', data, BaseScanner.done);
                     continue;
                 }
 
@@ -120,6 +123,19 @@ var BaseScanner = {
         BaseScanner._abort = true;
     },
 
+    done: function() {
+        BaseScanner._done ++;
+        if (BaseScanner._count === BaseScanner._done) {
+            console.log('DONE', BaseScanner._count, BaseScanner._done);
+            ST.util.button.setLabel('Done! (' + BaseScanner._count + ')');
+            setTimeout(function(){
+                ST.util.button.setLabel('Scan');
+            }, 2000);
+        } else {
+            ST.util.button.setLabel('Scanning... (' + BaseScanner._count + ')');
+        }
+    },
+
     getBaseLayout: function(base) {
         if (BaseScanner._abort) {
             BaseScanner._abort = false;
@@ -130,7 +146,7 @@ var BaseScanner = {
         if (base === undefined) {
             BaseScanner._abort = false;
             BaseScanner._scanning = false;
-            ST.util.button.setLabel('Scan');
+            BaseScanner.done();
             return;
         }
 
@@ -183,11 +199,10 @@ var BaseScanner = {
             'player': ClientLib.Data.MainData.GetInstance().get_Player().get_Name()
         };
 
+        BaseScanner._count ++;
         ST.util.api('scanBase', data, function() {
             BaseScanner.printScanResults(base);
-            if (!BaseScanner.isScanning()) {
-                ST.util.button.setLabel('Scan');
-            }
+            BaseScanner.done();
         });
 
         BaseScanner.scanNextBase();
@@ -345,7 +360,9 @@ var BaseScanner = {
                 'player': ClientLib.Data.MainData.GetInstance().get_Player().get_Name(),
                 'alliance': ClientLib.Data.MainData.GetInstance().get_Alliance().get_Id()
             };
-            ST.util.api('scanBase', data);
+
+            BaseScanner._count ++;
+            ST.util.api('scanBase', data, BaseScanner.done);
             return;
         }
 
@@ -386,7 +403,6 @@ var BaseScanner = {
 
         ST.util.api('scanBase', data, function() {
             console.log('SAVED BASE', data, arguments);
-            ST.util.button.setLabel('Scan');
         });
     }
 };
