@@ -13,7 +13,7 @@
         "*://*.alliances.commandandconquer.com/*/index.aspx*"
       ],
       "js": [
-        "shockrtools.js"
+        "shockrtools.user.js"
       ]
     }
   ]
