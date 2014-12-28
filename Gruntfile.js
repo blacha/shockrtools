@@ -32,6 +32,13 @@ module.exports = function(grunt) {
             }
         },
 
+        watch: {
+            client: {
+                files: 'client/modules/*.js',
+                tasks: ['default']
+            }
+        },
+
         copy: {
             chrome: {
                 files: [{
@@ -70,6 +77,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-includes');
     grunt.loadNpmTasks('grunt-mkdir');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     // Default tasks.
     grunt.registerTask('default', [
@@ -80,4 +88,6 @@ module.exports = function(grunt) {
         'mkdir:chrome', // set up chrome extensionbuild dir.
         'copy' // move all chrome extension files in.
     ]);
+
+    // grunt.registerTask('watch', ['watch']);
 }

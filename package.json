@@ -26,5 +26,8 @@
     "grunt-includes": "~0.4.4",
     "grunt-mkdir": "^0.1.2",
     "grunt-rename": "^0.1.3"
+  },
+  "dependencies": {
+    "grunt-contrib-watch": "^0.6.1"
   }
 }
