@@ -49,7 +49,7 @@ module.exports = function(grunt) {
                     }, {
                         flatten: true,
                         expand: true,
-                        src: 'target/shockrtools.js',
+                        src: 'target/shockrtools.user.js',
                         dest: 'target/chrome/'
                     }]
             }
