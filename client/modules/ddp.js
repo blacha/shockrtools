@@ -17,7 +17,7 @@
         };
     })();
 
-    var INIT_DDP_MESSAGE = '{\'server_id\':\'0\'}';
+    var INIT_DDP_MESSAGE = '{\"server_id\":\"0\"}';
     // After hitting the plateau, it'll try to reconnect
     // every 16.5 seconds
     var RECONNECT_ATTEMPTS_BEFORE_PLATEAU = 10;
@@ -320,7 +320,7 @@
                 throw new Error();
             }
         } catch (e) {
-            console.warn('Non DDP message received:');
+            console.warn('Non DDP message received:', INIT_DDP_MESSAGE);
             console.warn(message.data);
             return;
         }
