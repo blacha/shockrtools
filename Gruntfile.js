@@ -44,7 +44,7 @@ module.exports = function(grunt) {
                 files: [{
                         flatten: true,
                         expand: true,
-                        src: 'chrome/*.json',
+                        src: 'chrome/*',
                         dest: 'target/chrome/'
                     }, {
                         flatten: true,
@@ -68,6 +68,17 @@ module.exports = function(grunt) {
                 src: '**/*.js',
                 dest: 'target/'
             }
+        },
+
+        compress: {
+            chrome: {
+                options: {
+                  archive: 'target/shockrtools.zip'
+                },
+                files: [
+                    {cwd: 'target/chrome/', src: ['*'], dest: '/', expand:true}
+                ]
+            }
         }
 
     });
@@ -78,6 +89,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-includes');
     grunt.loadNpmTasks('grunt-mkdir');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-compress');
 
     // Default tasks.
     grunt.registerTask('default', [
@@ -86,8 +98,9 @@ module.exports = function(grunt) {
         'includes',
         'clean:modules', // remove all the old modules
         'mkdir:chrome', // set up chrome extensionbuild dir.
-        'copy' // move all chrome extension files in.
+        'copy', // move all chrome extension files in.
+        'compress'
     ]);
 
     // grunt.registerTask('watch', ['watch']);
-}
+};
