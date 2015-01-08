@@ -32,6 +32,9 @@ var PlayerInfo = {
         PlayerInfo.output.score = player.get_ScorePoints();
         PlayerInfo.output.rank = player.get_OverallRank();
 
+        var sub = PlayerInfo.instance.get_PlayerSubstitution().get_Outgoing();
+        PlayerInfo.output.sub = sub.n;
+
         var alliance = PlayerInfo.instance.get_Alliance();
         PlayerInfo.output.alliance = {
             id: alliance.get_Id(),
