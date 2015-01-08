@@ -39,7 +39,6 @@ var PlayerInfo = {
         PlayerInfo.output.alliance = {
             id: alliance.get_Id(),
             name: alliance.get_Name(),
-            bases: PlayerInfo._getAllianceBases(),
             bonus: {
                 power: alliance.get_POIPowerBonus(),
                 crystal: alliance.get_POICrystalBonus(),
@@ -59,46 +58,6 @@ var PlayerInfo = {
             max: player.GetCommandPointMaxStorage(),
             current: player.GetCommandPointCount()
         };
-    },
-
-    _getAllianceBases: function() {
-        var world = ClientLib.Data.MainData.GetInstance().get_World();
-        var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
-
-        var sectors = world.getSectors().d;
-        var bases = [];
-        Object.keys(sectors).forEach(function(s) {
-            var sector = sectors[s];
-            var baseList = sector.getBases().d;
-            Object.keys(baseList).forEach(function(o) {
-                var base = baseList[o];
-                if (typeof base.getOwnerID !== 'function') {
-                    return;
-                }
-
-                var playerID = sector.GetPlayerId(base.getOwnerID());
-                var player = allPlayers[playerID];
-                if (player === undefined) {
-                    return;
-                }
-
-                if (base.getBaseHealth() === 100) {
-                    return;
-                }
-
-                bases.push({
-                    playerID: playerID,
-                    player: player.Name,
-                    base: base.getBaseName(),
-                    baseHealth: base.getBaseHealth()
-                });
-            });
-        });
-
-        bases.sort(function(a, b) {
-            return b.baseHealth - a.baseHealth;
-        });
-        return bases;
     },
 
     _getNextMVC: function() {
