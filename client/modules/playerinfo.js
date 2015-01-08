@@ -145,6 +145,7 @@ var PlayerInfo = {
 
         base.x = c.get_PosX();
         base.y = c.get_PosY();
+        base.v = c.get_Version();
 
         base.buildings = PlayerInfo._getBuildings(c, base);
         base.units = PlayerInfo._getUnits(c, base);
