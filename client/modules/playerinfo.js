@@ -38,9 +38,13 @@ var PlayerInfo = {
             name: alliance.get_Name(),
             bases: PlayerInfo._getAllianceBases(),
             bonus: {
-                power: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Power),
-                crystal: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Crystal),
-                tiberium: alliance.GetPOIBonusFromResourceType(ClientLib.Base.EResourceType.Tiberium)
+                power: alliance.get_POIPowerBonus(),
+                crystal: alliance.get_POICrystalBonus(),
+                tiberium: alliance.get_POITiberiumBonus(),
+                air: alliance.get_POIAirBonus(),
+                def: alliance.get_POIDefenseBonus(),
+                vec: alliance.get_POIVehicleBonus(),
+                inf: alliance.get_POIInfantryBonus()
             },
             players: []
         };
