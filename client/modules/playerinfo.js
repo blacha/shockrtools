@@ -45,15 +45,6 @@ var PlayerInfo = {
             players: []
         };
 
-        var allPlayers = ClientLib.Data.MainData.GetInstance().get_Alliance().get_MemberData().d;
-        var players = [];
-        Object.keys(allPlayers).forEach(function(o) {
-            var player = allPlayers[o];
-            players.push(player.Name);
-        });
-
-        PlayerInfo.output.alliance.players = players;
-
         PlayerInfo.output.rp = player.get_ResearchPoints();
         PlayerInfo.output.credit = player.get_Credits().Base;
 
