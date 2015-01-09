@@ -20,6 +20,7 @@ var ST_MODULES = window.ST_MODULES = [];
 ST_MODULES.push(setupShockrTools);
 
 var setupShockrModules = function() {
+    console.time('ST:LoadModules');
 // import "ddp.js"
 // import "button.js"
 // import "basescanner.js"
@@ -27,6 +28,7 @@ var setupShockrModules = function() {
 // import "basescount.js"
 // import "supportstats.js"
 // import "killinfo.js"
+    console.timeEnd('ST:LoadModules');
 };
 ST_MODULES.push(setupShockrModules);
 
