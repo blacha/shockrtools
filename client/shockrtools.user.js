@@ -6,7 +6,7 @@
 // @grant           GM_xmlhttpRequest
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         4.5
+// @version         4.5.1
 // @downloadURL     https://c.ac.nz/client/shockrtools.user.js
 // @icon            https://c.ac.nz/favicon.png
 // ==/UserScript==

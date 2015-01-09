@@ -1,6 +1,6 @@
 {
   "name": "shockrtools",
-  "version": "0.0.1",
+  "version": "4.5.1",
   "description": "C&C TA Alliance tools",
   "main": "index.js",
   "scripts": {
