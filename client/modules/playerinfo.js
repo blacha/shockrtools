@@ -30,7 +30,6 @@ var PlayerInfo = {
 
         var shouldUpdate = false;
         Object.keys(PlayerInfo.versions).forEach(function(o){
-            console.log(o, PlayerInfo.versions[o], oldVersions[o]);
             if (PlayerInfo.versions[o] !== oldVersions[o]) {
                 shouldUpdate = true;
             }
@@ -38,8 +37,6 @@ var PlayerInfo = {
 
         if (shouldUpdate) {
             PlayerInfo.saveInfo();
-        } else {
-            console.log('ST:GetInfo - skip update as nothing has changed!');
         }
     },
 
