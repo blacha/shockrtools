@@ -20,7 +20,8 @@ var BaseCounter = {
     countBases: function(x, y, paste) {
         var levelCount = [];
         var count = 0;
-        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
+        var waves = 1;
+        var maxAttack = 10;
         var world = ClientLib.Data.MainData.GetInstance().get_World();
         for (var scanY = y - 10; scanY <= y + 10; scanY++) {
             for (var scanX = x - 10; scanX <= x + 10; scanX++) {
@@ -58,6 +59,16 @@ var BaseCounter = {
             }
         }
 
+        if(count > 49) {
+            waves = 5;
+        } else if(count > 39) {
+            waves = 4;
+        } else if(count > 29) {
+            waves = 3;
+        } else if(count > 19) {
+            waves = 2;
+        }
+
         var output = [];
         for (var i = 0; i < levelCount.length; i++) {
             var lvl = levelCount[i];
@@ -68,12 +79,13 @@ var BaseCounter = {
 
         // console.log('[' + x + ':' + y + '] Found ' + count + ' bases - ' + output.join(', '));
         if (paste === undefined || paste === true) {
-            BaseCounter.pasteOutput(x, y, count, output.join(', '));
+            BaseCounter.pasteOutput(x, y, count, output.join(', '), 'waves:', waves);
         }
         return {
             total: count,
             levels: levelCount,
-            formatted: output.join(', ')
+            formatted: output.join(', '),
+            waves: waves
         };
     },
 
@@ -93,6 +105,7 @@ var BaseCounter = {
 
         BaseCounter.ui.region.total.setValue(count.total);
         BaseCounter.ui.region.levels.setValue(count.formatted);
+        BaseCounter.ui.region.waves.setValue(' [ ' + count.waves + ' waves ]');
 
         target.add(BaseCounter.ui.region.container);
     },
@@ -162,6 +175,11 @@ var BaseCounter = {
             textColor: 'text-region-value'
         });
         a.add(BaseCounter.ui.region.total);
+
+        BaseCounter.ui.region.waves = new qx.ui.basic.Label().set({
+            textColor: 'text-region-value'
+        });
+        a.add(BaseCounter.ui.region.waves);
 
         var b = new qx.ui.container.Composite(new qx.ui.layout.HBox(4));
         b.add(new qx.ui.basic.Label('Levels:'));
@@ -253,7 +271,7 @@ var BaseCounter = {
 
                 if (BaseCounter.lastBase !== BaseCounter.selectedBase) {
                     var count = BaseCounter.count(false);
-                    this.__baseCountButton.setLabel('Bases: ' + count.total);
+                    this.__baseCountButton.setLabel('Bases: ' + count.total  + ' [' + count.waves + ']');
                     BaseCounter.lastBase = BaseCounter.selectedBase;
                 }
                 // console.log(children);
