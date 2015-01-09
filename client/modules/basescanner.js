@@ -7,6 +7,8 @@ var BaseScanner = {
     _patched: false,
     _bases: {},
     _selectionBases: {},
+    _toScan: [],
+    _scanning: false,
     failCount: 0,
 
     scan: function() {
@@ -131,6 +133,8 @@ var BaseScanner = {
             setTimeout(function(){
                 ST.util.button.setLabel('Scan');
             }, 2000);
+        } else if (BaseScanner._scanning === false) {
+            ST.util.button.setLabel('Scan');
         } else {
             ST.util.button.setLabel('Scanning... (' + BaseScanner._count + '/'  + BaseScanner._toScan.length + ')');
         }
