@@ -5,10 +5,17 @@ var PlayerInfo = {
 
     instance: null,
     output: {},
+    versions: {},
 
     getInfo: function() {
         PlayerInfo.patchClientLib();
         console.time('ST:getInfo');
+
+        var oldVersions = {};
+        Object.keys(PlayerInfo.versions).forEach(function(o){
+            oldVersions[o] = PlayerInfo.versions[o];
+        });
+
         // ST.log.debug('getInfo');
         PlayerInfo.instance = ClientLib.Data.MainData.GetInstance();
         PlayerInfo.output.world = PlayerInfo.instance.get_Server().get_WorldId();
@@ -20,7 +27,20 @@ var PlayerInfo = {
 
         ST.log.debug(PlayerInfo.output);
         console.timeEnd('ST:getInfo');
-        PlayerInfo.saveInfo();
+
+        var shouldUpdate = false;
+        Object.keys(PlayerInfo.versions).forEach(function(o){
+            console.log(o, PlayerInfo.versions[o], oldVersions[o]);
+            if (PlayerInfo.versions[o] !== oldVersions[o]) {
+                shouldUpdate = true;
+            }
+        });
+
+        if (shouldUpdate) {
+            PlayerInfo.saveInfo();
+        } else {
+            console.log('ST:GetInfo - skip update as nothing has changed!');
+        }
     },
 
     _getPlayerInfo: function() {
@@ -32,7 +52,7 @@ var PlayerInfo = {
         PlayerInfo.output.score = player.get_ScorePoints();
         PlayerInfo.output.rank = player.get_OverallRank();
 
-        var sub = PlayerInfo.instance.get_PlayerSubstitution().get_Outgoing();
+        var sub = PlayerInfo.instance.get_PlayerSubstitution().getOutgoing();
         PlayerInfo.output.sub = sub.n;
 
         var alliance = PlayerInfo.instance.get_Alliance();
@@ -115,6 +135,7 @@ var PlayerInfo = {
         // ST.log.debug('\t\t getCity - ' + c.get_Name());
         var base = {};
 
+
         PlayerInfo.output.repair = c.GetResourceMaxStorage(ClientLib.Base.EResourceType.RepairChargeInf);
 
         base.defense = c.get_LvlDefense();
@@ -161,6 +182,7 @@ var PlayerInfo = {
             base.name.replace(/\./g, '');
         }
         PlayerInfo.output.bases.push(base);
+        PlayerInfo.versions[base.name] = base.v;
     },
 
     saveInfo: function() {
