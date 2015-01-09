@@ -50,7 +50,9 @@ var PlayerInfo = {
         PlayerInfo.output.rank = player.get_OverallRank();
 
         var sub = PlayerInfo.instance.get_PlayerSubstitution().getOutgoing();
-        PlayerInfo.output.sub = sub.n;
+        if (sub) {
+            PlayerInfo.output.sub = sub.n;
+        }
 
         var alliance = PlayerInfo.instance.get_Alliance();
         PlayerInfo.output.alliance = {
