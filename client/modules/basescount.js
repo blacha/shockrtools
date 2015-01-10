@@ -218,7 +218,8 @@ var BaseCounter = {
             webfrontend.gui.region.RegionCityStatusInfoEnemy,
             webfrontend.gui.region.RegionNPCBaseStatusInfo,
             webfrontend.gui.region.RegionNPCCampStatusInfo,
-            webfrontend.gui.region.RegionRuinStatusInfo
+            webfrontend.gui.region.RegionRuinStatusInfo,
+            webfrontend.gui.region.RegionPointOfInterestStatusInfo
         ];
 
         BaseCounter._listeners = [];
