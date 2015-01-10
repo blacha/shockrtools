@@ -29,7 +29,7 @@ var BaseCounter = {
                 var distY = Math.abs(y - scanY);
                 var distance = Math.sqrt((distX * distX) + (distY * distY));
                 // too far away to scan
-                if (distance >= maxAttack) {
+                if (distance > maxAttack) {
                     continue;
                 }
 
@@ -121,6 +121,7 @@ var BaseCounter = {
 
         BaseCounter.ui.move.total.setValue(count.total);
         BaseCounter.ui.move.levels.setValue(count.formatted);
+        BaseCounter.ui.move.waves.setValue(' [ ' + count.waves + ' waves ]');
     },
 
     onBaseMoveDeActivate: function() {
@@ -144,6 +145,11 @@ var BaseCounter = {
             textColor: 'text-region-value'
         });
         a.add(BaseCounter.ui.move.total);
+
+        BaseCounter.ui.move.waves = new qx.ui.basic.Label().set({
+            textColor: 'text-region-value'
+        });
+        a.add(BaseCounter.ui.move.waves);
 
         var b = new qx.ui.container.Composite(new qx.ui.layout.HBox(6));
         b.add(new qx.ui.basic.Label('Levels:').set({
