@@ -3,7 +3,6 @@
 // @author          Shockr <shockr@c.ac.nz>
 // @description     Tools to work with Tiberium alliances http://c.ac.nz/taopt
 // @include         http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @grant           GM_xmlhttpRequest
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
 // @version         4.5.3
