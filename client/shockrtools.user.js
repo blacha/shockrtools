@@ -13,6 +13,8 @@
 
 var setupShockrTools = function() {
 // import "main.js"
+
+ST.version = '4.5.3';
 };
 
 

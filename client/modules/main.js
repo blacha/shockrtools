@@ -165,6 +165,9 @@ ST.util = {
     },
 
     api: function(method, data, callback) {
+        // Set the shockr tools version.
+        data.st_v = ST.version;
+
         if (typeof callback === 'undefined') {
             callback = ST.util.noop;
         }
