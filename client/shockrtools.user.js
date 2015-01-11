@@ -5,7 +5,7 @@
 // @include         http*://prodgame*.alliances.commandandconquer.com/*/index.aspx*
 // @grant           GM_updatingEnabled
 // @grant           unsafeWindow
-// @version         4.5.3
+// @version         4.5.4
 // @downloadURL     https://c.ac.nz/client/shockrtools.user.js
 // @icon            https://c.ac.nz/favicon.png
 // ==/UserScript==
@@ -13,7 +13,7 @@
 var setupShockrTools = function() {
 // import "main.js"
 
-ST.version = '4.5.3';
+ST.version = '4.5.4';
 };
 
 
