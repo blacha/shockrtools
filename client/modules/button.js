@@ -7,7 +7,6 @@ var Button = {
         registerButtons();
         // Init the button
         ST.qx.main.getInstance();
-
         ST.util.button.setLabel('Scan');
     }
 };
@@ -20,17 +19,27 @@ function registerButtons() {
             this.button = new qx.ui.form.Button('Scan');
             this.button.set({
                 width: 100,
-                appearance: 'button-bar-center',
-                toolTipText: 'Scan'
+                appearance: 'button-bar-right',
+                toolTipText: 'Scan Layouts'
             });
 
             ST.util.button = this.button;
             this.button.addListener('click', this.click, this);
             var mainBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_MENU);
-            mainBar.getChildren()[1].addAt(this.button, 8, {
-                top: 0,
-                right: 0
-            });
+            var childs = mainBar.getChildren()[1].getChildren();
+
+            for( var i = childs.length - 1; i>=0;i--){
+                if( typeof childs[i].setAppearance === "function"){
+                    if( childs[i].getAppearance() == "button-bar-right"){
+                        childs[i].setAppearance("button-bar-center");
+                    }
+                }
+            }
+
+            mainBar.getChildren()[1].add(this.button);
+            mainBar.getChildren()[0].setScale(true);
+            mainBar.getChildren()[0].setWidth(860);
+
             console.log('ST:Util - Scan Button added');
         },
         members: {
