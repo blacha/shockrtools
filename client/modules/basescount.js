@@ -88,20 +88,21 @@ var BaseCounter = {
 
         if(average !== 0){ average /= count}
 
-
         var output = [];
-        var output_chat = [];
 
         for (var i = 0; i < levelCount.length; i++) {
             var lvl = levelCount[i];
             if (lvl !== undefined) {
-                output.push(lvl + 'x ' + i);
-                output_chat.push(lvl + 'x' + i);
+                if (paste === undefined || paste === true) {
+                    output.push(lvl + 'x' + i);
+                    } else {
+                        output.push(lvl + 'x ' + i);
+                        }
             }
         }
 
         if (paste === undefined || paste === true) {
-            BaseCounter.pasteOutput(x, y, count, output_chat.join(' '), waves, average.toFixed(2));
+            BaseCounter.pasteOutput(x, y, count, output.join(' '), waves, average.toFixed(2));
         }
 
         return {
