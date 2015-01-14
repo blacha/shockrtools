@@ -5,13 +5,28 @@ var BaseCounter = {
     name: 'BaseCounter',
     ui: {},
 
-    pasteOutput: function(x, y, baseCount, baseData) {
+    pasteOutput: function(x, y, baseCount, baseData, waves, average) {
         var input = qx.core.Init.getApplication().getChat().getChatWidget().getEditable();
         var dom = input.getContentElement().getDomElement();
 
         var output = [];
         output.push(dom.value.substring(0, dom.selectionStart));
-        output.push('[[coords]' + x + ':' + y + '[/coords]] Found ' + baseCount + ' Bases - ' + baseData);
+        output.push('[coords]' + x + ':' + y + '[/coords] [' + baseCount + ' Bases (' + waves + ' waves): ' + baseData + ' (' + average + ')]');
+        output.push(dom.value.substring(dom.selectionEnd, dom.value.length));
+
+        input.setValue(output.join(' '));
+    },
+
+    pasteCoords: function () {
+        if (BaseCounter.selectedBase === null || BaseCounter.selectedBase === undefined) {
+            return;
+        }
+        var input = qx.core.Init.getApplication().getChat().getChatWidget().getEditable();
+        var dom = input.getContentElement().getDomElement();
+
+        var output = [];
+        output.push(dom.value.substring(0, dom.selectionStart));
+        output.push('[coords]' + BaseCounter.selectedBase.get_RawX() + ':' + BaseCounter.selectedBase.get_RawY() + '[/coords]');
         output.push(dom.value.substring(dom.selectionEnd, dom.value.length));
 
         input.setValue(output.join(' '));
@@ -21,6 +36,7 @@ var BaseCounter = {
         var levelCount = [];
         var count = 0;
         var waves = 1;
+        var average = 0;
         var maxAttack = 10;
         var world = ClientLib.Data.MainData.GetInstance().get_World();
         for (var scanY = y - 10; scanY <= y + 10; scanY++) {
@@ -55,6 +71,7 @@ var BaseCounter = {
                 var level = object.getLevel();
                 levelCount[level] = (levelCount[level] || 0) + 1;
 
+                average += level;
                 count++;
             }
         }
@@ -69,23 +86,31 @@ var BaseCounter = {
             waves = 2;
         }
 
+        if(average !== 0){ average /= count}
+
         var output = [];
+
         for (var i = 0; i < levelCount.length; i++) {
             var lvl = levelCount[i];
             if (lvl !== undefined) {
-                output.push(lvl + ' x ' + i);
+                if (paste === undefined || paste === true) {
+                    output.push(lvl + 'x' + i);
+                    } else {
+                        output.push(lvl + 'x ' + i);
+                        }
             }
         }
 
-        // console.log('[' + x + ':' + y + '] Found ' + count + ' bases - ' + output.join(', '));
         if (paste === undefined || paste === true) {
-            BaseCounter.pasteOutput(x, y, count, output.join(', '), 'waves:', waves);
+            BaseCounter.pasteOutput(x, y, count, output.join(' '), waves, average.toFixed(2));
         }
+
         return {
             total: count,
             levels: levelCount,
-            formatted: output.join(', '),
-            waves: waves
+            formatted: output.join(' '),
+            waves: waves,
+            average: average.toFixed(2)
         };
     },
 
@@ -105,7 +130,8 @@ var BaseCounter = {
 
         BaseCounter.ui.region.total.setValue(count.total);
         BaseCounter.ui.region.levels.setValue(count.formatted);
-        BaseCounter.ui.region.waves.setValue(' [ ' + count.waves + ' waves ]');
+        BaseCounter.ui.region.waves.setValue(' (' + count.waves + ' waves)');
+        BaseCounter.ui.region.average.setValue(' (' + count.average + ')');
 
         target.add(BaseCounter.ui.region.container);
     },
@@ -121,7 +147,8 @@ var BaseCounter = {
 
         BaseCounter.ui.move.total.setValue(count.total);
         BaseCounter.ui.move.levels.setValue(count.formatted);
-        BaseCounter.ui.move.waves.setValue(' [ ' + count.waves + ' waves ]');
+        BaseCounter.ui.move.waves.setValue(' (' + count.waves + ' waves)');
+        BaseCounter.ui.move.average.setValue(' (' + count.average + ')');
     },
 
     onBaseMoveDeActivate: function() {
@@ -162,6 +189,10 @@ var BaseCounter = {
         });
         b.add(BaseCounter.ui.move.levels);
 
+        BaseCounter.ui.move.average = new qx.ui.basic.Label().set({
+            textColor: 'text-region-value'
+        });
+        b.add(BaseCounter.ui.move.average);
 
         BaseCounter.ui.move.container = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
             textColor: 'text-region-tooltip'
@@ -193,6 +224,11 @@ var BaseCounter = {
             textColor: 'text-region-value'
         });
         b.add(BaseCounter.ui.region.levels);
+
+        BaseCounter.ui.region.average = new qx.ui.basic.Label().set({
+            textColor: 'text-region-value'
+        });
+        b.add(BaseCounter.ui.region.average);
 
         BaseCounter.ui.region.container = new qx.ui.container.Composite(new qx.ui.layout.VBox()).set({
             marginTop: 6,
@@ -261,44 +297,68 @@ var BaseCounter = {
     },
 
     registerButton: function() {
-        if (!webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu) {
-            webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu = webfrontend.gui.region.RegionCityMenu.prototype.showMenu;
 
-            webfrontend.gui.region.RegionCityMenu.prototype.showMenu = function(selectedVisObject) {
+        if (webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu){
+            webfrontend.gui.region.RegionCityMenu.prototype.showMenu = webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu;
+            webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_initialized = false;
+            webfrontend.gui.region.RegionCityMenu.prototype.__baseCounterButton_showMenu = undefined;
+        };
+
+        if (!webfrontend.gui.region.RegionCityMenu.prototype.__countButton_showMenu) {
+            webfrontend.gui.region.RegionCityMenu.prototype.__countButton_showMenu = webfrontend.gui.region.RegionCityMenu.prototype.showMenu;
+            webfrontend.gui.region.RegionCityMenu.prototype.showMenu = function (selectedVisObject) {
+
+                var self = this;
                 BaseCounter.selectedBase = selectedVisObject;
-                if (this.__baseCounterButton_initialized !== true) {
-                    this.__baseCounterButton_initialized = true;
 
-                    this.__baseCountButton = new qx.ui.form.Button('Paste BaseCount');
-                    this.__baseCountButton.addListener('execute', function() {
-                        BaseCounter.count();
+                if (this.__countButton_initialized != 1) {
+                    this.__countButton_initialized = 1;
+
+                    this.__coordButton = [];
+                    this.__countButton = [];
+
+                    this.__countComposite = new qx.ui.container.Composite(new qx.ui.layout.VBox(0)).set({
+                        padding: 2
                     });
+
+                    for (var i in this) {
+                        try {
+                            if (this[i] && this[i].basename == "Composite") {
+                                var coordbutton = new qx.ui.form.Button("Paste Coords");
+                                coordbutton.addListener("execute", function () {
+                                    BaseCounter.pasteCoords();
+                                });
+                                var countbutton = new qx.ui.form.Button("Paste Count");
+                                countbutton.addListener("execute", function () {
+                                    BaseCounter.count();
+                                });
+                                this[i].add(coordbutton);
+                                this[i].add(countbutton);
+                                this.__coordButton.push(coordbutton);
+                                this.__countButton.push(countbutton);
+                            }
+                        } catch (e) {
+                            console.log("buttons ", e);
+                        }
+                    }
+                }
+                var count = BaseCounter.count(false);
+                for (var i = 0; i < self.__countButton.length; ++i) {
+                    self.__countButton[i].setLabel('Paste Count (' + count.total + ')');
                 }
 
-
-                if (BaseCounter.lastBase !== BaseCounter.selectedBase) {
-                    var count = BaseCounter.count(false);
-                    this.__baseCountButton.setLabel('Bases: ' + count.total  + ' [' + count.waves + ']');
-                    BaseCounter.lastBase = BaseCounter.selectedBase;
-                }
-                // console.log(children);
-                this.__baseCounterButton_showMenu(selectedVisObject);
                 switch (selectedVisObject.get_VisObjectType()) {
-                    case ClientLib.Vis.VisObject.EObjectType.RegionNPCCamp:
-                    case ClientLib.Vis.VisObject.EObjectType.RegionNPCBase:
                     case ClientLib.Vis.VisObject.EObjectType.RegionPointOfInterest:
                     case ClientLib.Vis.VisObject.EObjectType.RegionRuin:
                     case ClientLib.Vis.VisObject.EObjectType.RegionHubControl:
                     case ClientLib.Vis.VisObject.EObjectType.RegionHubServer:
-                    case ClientLib.Vis.VisObject.EObjectType.RegionCityType:
-                        this.add(this.__baseCountButton);
+                        this.add(this.__countComposite);
                         break;
-                    default:
-                        console.log(selectedVisObject.get_VisObjectType());
                 }
+
+                this.__countButton_showMenu(selectedVisObject);
             };
         }
-
     },
 
     _patchClientLib: function() {
