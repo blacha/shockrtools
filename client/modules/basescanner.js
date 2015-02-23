@@ -1,4 +1,5 @@
 /* globals ClientLib, phe, ST */
+
 var MAX_FAILS = 25;
 
 var BaseScanner = {
@@ -24,6 +25,7 @@ var BaseScanner = {
         BaseScanner._count = 0;
         BaseScanner._done = 0;
         BaseScanner.index = -1;
+        BaseScanner._last = -1;
         BaseScanner._toScanMap = {};
         BaseScanner._toScan = [];
 
@@ -48,7 +50,7 @@ var BaseScanner = {
         var x = base.get_PosX();
         var y = base.get_PosY();
 
-        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance() - 0.5;
+        var maxAttack = ClientLib.Data.MainData.GetInstance().get_Server().get_MaxAttackDistance();
         var world = ClientLib.Data.MainData.GetInstance().get_World();
         ST.log.debug('[BaseScanner] Scanning from ' + x + ':' + y);
         var toScanCount = 0;
@@ -58,7 +60,7 @@ var BaseScanner = {
                 var distY = Math.abs(y - scanY);
                 var distance = Math.sqrt((distX * distX) + (distY * distY));
                 // too far away to scan
-                if (distance >= maxAttack) {
+                if (distance > maxAttack) {
                     continue;
                 }
                 // already scanning this base from another city.
@@ -72,7 +74,6 @@ var BaseScanner = {
                 if (object === null) {
                     continue;
                 }
-
 
                 // Object isnt a NPC Base/Camp/Outpost
                 if (object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCBase && object.Type !== ClientLib.Data.WorldSector.ObjectType.NPCCamp) {
@@ -127,16 +128,32 @@ var BaseScanner = {
 
     done: function() {
         BaseScanner._done ++;
-        if (BaseScanner._scanning === false &&
-            BaseScanner._count === BaseScanner._done) {
-            ST.util.button.setLabel('Done! (' + BaseScanner._count + ')');
-            setTimeout(function(){
-                ST.util.button.setLabel('Scan');
-            }, 2000);
-        } else if (BaseScanner._scanning === false) {
-            ST.util.button.setLabel('Scan');
+        if (BaseScanner._scanning === true) {
+            if (BaseScanner.index !== BaseScanner._last) {
+                if (BaseScanner.index === 0) {
+                    ST.util.button.setLabel('Found (' + BaseScanner._toScan.length + ')');
+                } else {
+                    ST.util.button.setLabel('Scanning (' + BaseScanner.index + '/'  + BaseScanner._toScan.length + ')');
+                }
+                BaseScanner._last = BaseScanner.index;
+            }
         } else {
-            ST.util.button.setLabel('Scanning... (' + BaseScanner._count + '/'  + BaseScanner._toScan.length + ')');
+            if (BaseScanner.index !== BaseScanner._last) {
+                if (BaseScanner._toScan.length === 0) {
+                    ST.util.button.setLabel('Found (' + BaseScanner._toScan.length + ')');
+                } else {
+                    ST.util.button.setLabel('Scanning (' + BaseScanner.index + '/'  + BaseScanner._toScan.length + ')');
+                }
+                BaseScanner._last = BaseScanner.index;
+            }
+            if (BaseScanner._count === BaseScanner._done) {
+                setTimeout(function(){
+                    ST.util.button.setLabel('Done! (' + BaseScanner.index + ')');
+                }, 2000);
+                setTimeout(function(){
+                    ST.util.button.setLabel('Scan');
+                }, 4000);
+            }
         }
     },
 
@@ -229,7 +246,6 @@ var BaseScanner = {
     },
 
     printScanResults: function(base) {
-        ST.util.button.setLabel(('   ' + BaseScanner.index).slice(-3) + '/' + BaseScanner._toScan.length);
         console.log('[' + ('   ' + BaseScanner.index).slice(-3) + '/' + BaseScanner._toScan.length + ']\t' + base.x + ':' + base.y + ' ' + base.layout + ' (' + base.failCount + ')');
     },
 
@@ -503,7 +519,5 @@ var PatchClientLib = {
         BaseScanner._patched = true;
     }
 };
-
-
 
 ST.register(BaseScanner);
